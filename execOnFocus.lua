@@ -28,13 +28,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 _addon.name = "execOnFocus"
 _addon.author = "Xenodeus"
-_addon.version = "1.0"
+_addon.version = "1.1"
 _addon.commands = {"execOnFocus", "exof"}
 
+function execute_command(msg)
+    if msg:sub(1, 2) == '//' then
+        windower.send_command(msg:sub(3))
+    elseif msg:sub(1, 1) == '/' then
+        windower.send_command('input '..msg)
+    elseif msg:sub(1, 3) == 'atc' then
+        windower.add_to_chat(55, msg:sub(5))
+    else
+        windower.send_command(msg)
+    end
+end
+
 windower.register_event('addon command',function (...)
-    local command = table.concat({...}, " ")
-    if command == "" then return end
+    if not ... then
+        error('No command provided.')
+        return
+    end
+    local command = T{...}:map(string.strip_format .. windower.convert_auto_trans):map(function(str)
+        return str:find(' ', string.encoding.shift_jis, true) and str:enclose('"') or str
+    end):sconcat():gsub('<(%a+)id>', function(target_string)
+        local entity = windower.ffxi.get_mob_by_target(target_string)
+        return entity and entity.id or '<' .. target_string .. 'id>'
+    end)
     if windower.has_focus() then
-	    windower.send_command(command)
+        execute_command(command)
     end
 end)
