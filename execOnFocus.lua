@@ -31,6 +31,11 @@ _addon.author = "Xenodeus"
 _addon.version = "1.1"
 _addon.commands = {"execOnFocus", "exof"}
 
+require('resources')
+require('tables')
+require('logger')
+require('strings')
+
 function execute_command(msg)
     if msg:sub(1, 2) == '//' then
         windower.send_command(msg:sub(3))
